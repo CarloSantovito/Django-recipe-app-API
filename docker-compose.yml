@@ -1,0 +1,19 @@
+# Docker compose version
+version: "3"
+# Declaring all the services that we need, only one in this case
+services:
+  # Name of the service
+  app:
+    # Section of the service
+    build:
+      # The context is the root directory
+      context: .
+    # Ports configuration between container and machine
+    ports:
+      - "8000:8000"
+    # Creation of a volume so every file you change in ./app here will be updated in container too without restarting it
+    volumes:
+      - ./app:/app
+    # Commands to run once the image is started. The ">" symbol is to go on newline here in the yaml file
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
