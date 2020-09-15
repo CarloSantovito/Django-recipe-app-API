@@ -1,0 +1,13 @@
+# Language to use
+language: python
+# Which version of the language
+python:
+  - "3.6"
+# Which services we want to use
+services:
+  - docker
+# Commands to run before the script, with this we install docker-compose
+before_script: pip install docker-compose
+# Script to use to test our application, flake8 is a linter tool
+script:
+  - docker-compose run app sh -c "python manage.py test && flake8"
