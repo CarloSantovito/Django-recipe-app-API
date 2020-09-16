@@ -1,8 +1,8 @@
 # Docker compose version
 version: "3"
-# Declaring all the services that we need, only one in this case
+# Declaring all the services that we need
 services:
-  # Name of the service
+  # Name of the service, our application
   app:
     # Section of the service
     build:
@@ -16,4 +16,25 @@ services:
       - ./app:/app
     # Commands to run once the image is started. The ">" symbol is to go on newline here in the yaml file
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c " python manage.py wait_for_db &&
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    # Env variables to configure the link to our postgres DB
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=passwordsecret
+    # This keyword means that this service 'app' depends from service 'db'
+    # so docker-compose must start first 'db' and after 'app' otherwise app will not start properly
+    depends_on:
+      - db
+
+  # Database service
+  db:
+    # Image to use from docker-hub
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=passwordsecret
