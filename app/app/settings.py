@@ -125,6 +125,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+# Those are the url mapping to access static and media files
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+# Those are the root of media/static files in our server defined in Dockerfile
+MEDIA_ROOT = '/vol/web/media'
+STATIC_ROOT = '/vol/web/static/'
 
 AUTH_USER_MODEL = 'core.User'
