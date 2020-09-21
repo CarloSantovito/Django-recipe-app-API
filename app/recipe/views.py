@@ -44,9 +44,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def _params_to_ints(self, qs):
+        """Convert a list of string IDs to a list of integers"""
+        return [int(str_id) for str_id in qs.split(',')]
+
     def get_queryset(self):
         """Retrieve the recipes for the authenticated user"""
-        return self.queryset.filter(user=self.request.user)
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset
+        if tags:
+            tag_ids = self._params_to_ints(tags)
+            # This is how Django filter on a foreign table, here we are
+            # filtering on tags id and we are making an IN (SQL)
+            queryset = queryset.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ingredient_ids = self._params_to_ints(ingredients)
+            queryset = queryset.filter(ingredients__id__in=ingredient_ids)
+
+        return queryset.filter(user=self.request.user)
 
     # If you are getting the recipe Detail serializer must be changed
     # in RecipeDetailSerializer
@@ -63,6 +79,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe"""
         serializer.save(user=self.request.user)
 
+    # This is a custom action, we define which type of function (GET-POST..),
+    # the url to call to use this action and the detail param that tell Django
+    # that this action is on a Detail of an object already created
     @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk=None):
         """Upload an image to a recipe"""
